@@ -60,10 +60,25 @@ function visualValues(){return {font:$('designFont').value,width:Number($('desig
 function fillVisual(){const d={font:'Alexandria',width:1080,titleSize:64,bodySize:16,sectionSpace:96,radius:18,button:'soft',align:'right',...(settings.design||{})};$('designFont').value=d.font;$('designWidth').value=d.width;$('designTitle').value=d.titleSize;$('designBody').value=d.bodySize;$('designSpace').value=d.sectionSpace;$('designRadius').value=d.radius;$('designButton').value=d.button;$('designAlign').value=d.align;updateVisual()}
 function updateVisual(){const d=visualValues();$('designTitleValue').textContent=d.titleSize+'px';$('designBodyValue').textContent=d.bodySize+'px';$('designSpaceValue').textContent=d.sectionSpace+'px';$('designRadiusValue').textContent=d.radius+'px';$('previewTitle').style.fontSize=Math.round(d.titleSize*.66)+'px';$('previewBody').style.fontSize=d.bodySize+'px';$('visualPreview').style.borderRadius=d.radius+'px';$('visualPreview').style.maxWidth=d.width+'px';$('visualPreview').style.textAlign=d.align;$('previewButton').style.borderRadius=d.button==='pill'?'999px':d.button==='square'?'2px':'12px';$('previewButton').style.fontFamily=d.font+',sans-serif';$('previewTitle').style.fontFamily=d.font+',sans-serif';$('previewBody').style.fontFamily=d.font+',sans-serif';$('previewTitle').style.color=settings.colors?.ink||'#263b36';$('previewButton').style.background=settings.colors?.green||'#477e6e'}
 for(const id of ['designFont','designWidth','designTitle','designBody','designSpace','designRadius','designButton','designAlign']){document.addEventListener('input',e=>{if(e.target.id===id)updateVisual()});document.addEventListener('change',e=>{if(e.target.id===id)updateVisual()})}
-$('saveVisual').onclick=async()=>{settings.design=visualValues();await saveSettingsOnly('التصميم')};
+$('saveVisual').onclick=async()=>{const btn=$('saveVisual');btn.disabled=true;btn.textContent='جارٍ حفظ التصميم…';try{settings.design=visualValues();await saveSettingsOnly('التصميم')}catch(e){}finally{btn.disabled=false;btn.textContent='حفظ التصميم'}};
 $('resetVisual').onclick=()=>{settings.design={font:'Alexandria',width:1080,titleSize:64,bodySize:16,sectionSpace:96,radius:18,button:'soft',align:'right'};fillVisual();say('mainStatus','رجعت الإعدادات الافتراضية في المعاينة. اضغطي حفظ التصميم لتطبيقها.')};
 function saveDraft(label){try{localStorage.setItem(DRAFT_KEY,JSON.stringify(settings));say('mainStatus','حُفظت '+label+' كمسودة محلية. استخدمي معاينة التغييرات ثم انشريها عند اعتمادها.')}catch(e){say('mainStatus','تعذر حفظ المسودة: '+e.message,true)}}
-async function saveSettingsOnly(label){saveDraft(label)}
+async function saveSettingsOnly(label){
+ try{
+  for(const [k] of textDefs){const el=$('txt-'+k);if(el)settings.texts[k]=el.value}
+  for(const [k] of colorDefs){const el=$('col-'+k);if(el&&/^#[0-9a-fA-F]{6}$/.test(el.value.trim()))settings.colors[k]=el.value.trim()}
+  for(const [k] of imageDefs){const el=$('img-'+k);const v=el?.value.trim()||'';if(v){if(!/^https:\/\//i.test(v))throw new Error('رابط الصورة يجب أن يبدأ بـ https://');settings.images[k]=v}else delete settings.images[k]}
+  settings.design=visualValues();
+  localStorage.setItem(DRAFT_KEY,JSON.stringify(settings));
+  const {data:{user},error:userError}=await db.auth.getUser();
+  if(userError||!user)throw userError||new Error('انتهت جلسة الإدارة؛ سجّلي الدخول من جديد');
+  const {data:saved,error}=await db.from('site_content').upsert({content_key:'site_settings',content:settings,updated_by:user.id,updated_at:new Date().toISOString()}).select('content_key,content').maybeSingle();
+  if(error)throw error;
+  if(!saved||saved.content_key!=='site_settings')throw new Error('لم تؤكد قاعدة البيانات حفظ الإعدادات');
+  localStorage.removeItem(DRAFT_KEY);
+  say('mainStatus','تم حفظ '+label+' في قاعدة البيانات. حدّثي الموقع المنشور للتحقق.');
+ }catch(e){say('mainStatus','تعذّر حفظ '+label+': '+(e.message||'خطأ غير معروف'),true);throw e}
+}
 $('previewDraft').onclick=()=>{try{localStorage.setItem(DRAFT_KEY,JSON.stringify(settings));window.open('./?preview=1','_blank','noopener');say('mainStatus','فُتحت معاينة المسودة. لن تظهر التغييرات للزوار قبل النشر.')}catch(e){say('mainStatus','تعذر فتح المعاينة: '+e.message,true)}};
 $('publishDraft').onclick=async()=>{const btn=$('publishDraft');btn.disabled=true;try{const {data:{user},error:userError}=await db.auth.getUser();if(userError||!user)throw userError||new Error('انتهت جلسة الإدارة');const {data:saved,error}=await db.from('site_content').upsert({content_key:'site_settings',content:settings,updated_by:user.id,updated_at:new Date().toISOString()}).select('content_key,content').maybeSingle();if(error)throw error;if(!saved||saved.content_key!=='site_settings')throw new Error('لم تُحفظ الإعدادات في قاعدة البيانات. تحققي من صلاحيات الكتابة (RLS) لجدول site_content.');localStorage.removeItem(DRAFT_KEY);say('mainStatus','تم نشر إعدادات الموقع والتحقق من وجودها في قاعدة البيانات. افتحي الموقع العام وحدّثيه بـ Ctrl + Shift + R.')}catch(e){say('mainStatus','تعذر النشر: '+e.message,true)}finally{btn.disabled=false}};
 async function readSettings(){const {data,error}=await db.from('site_content').select('content').eq('content_key','site_settings').maybeSingle();if(error)throw error;settings=data?.content||defaults();try{const draft=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');if(draft&&draft.texts&&draft.colors&&draft.design)settings=draft}catch{}settings.texts ||= {};settings.colors ||= {};settings.images ||= {};settings.design ||= {};fillForm();fillVisual()}
