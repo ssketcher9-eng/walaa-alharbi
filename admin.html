@@ -95,7 +95,8 @@ try{
  const next={...latest,texts:{...(latest.texts||{})},colors:{...(latest.colors||{})},images:{...(latest.images||{})},design:{...(latest.design||{})}};
  if(part==='texts')for(const [k] of textDefs)next.texts[k]=$('txt-'+k).value;
  if(part==='colors')for(const [k] of colorDefs){const v=$('col-'+k).value.trim();if(!/^#[0-9a-fA-F]{6}$/.test(v))throw new Error('رمز لون غير صحيح عند '+k);next.colors[k]=v}
- if(part==='images')for(const [k] of imageDefs){const v=$('img-'+k).value.trim();if(v&&!/^https:\/\//i.test(v))throw new Error('رابط الصورة يجب أن يبدأ بـ https://');if(v)next.images[k]=v;else if(Object.prototype.hasOwnProperty.call(settings.images||{},k))next.images[k]=settings.images[k];}
+ // Preserve any newly uploaded or edited image URL even when the user clicks a different save button.
+ for(const [k] of imageDefs){const v=$('img-'+k).value.trim();if(v){if(!/^https:\/\//i.test(v))throw new Error('رابط الصورة يجب أن يبدأ بـ https://');next.images[k]=v}else if(latest.images?.[k]){next.images[k]=latest.images[k]}else if(settings.images?.[k]){next.images[k]=settings.images[k]}}
  if(part==='design')next.design=visualValues();
  // Keep current form state for untouched panels while preserving DB values.
  settings=next;
