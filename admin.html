@@ -38,8 +38,21 @@ function syncLivePreview(){
   for(const [k] of imageDefs){const e=$('img-'+k);if(e&&e.value.trim())settings.images[k]=e.value.trim();else if(!settings.images?.[k]){settings.images||={};/* preserve saved image URLs when an image field is blank */}}
   settings.design=visualValues();
   localStorage.setItem(DRAFT_KEY,JSON.stringify(settings));
+  // Apply edits directly to the same-origin preview first, so feedback does not depend on iframe reload timing.
+  const frame=$('liveSitePreview');
+  const apply=()=>{
+   try{
+    const doc=frame.contentDocument;if(!doc)return;
+    const map={heroEyebrow:['.hero-content .eyebrow','text'],heroTitle:['.hero-content h1','html'],heroDesc:['.hero-copy','text'],heroButton:['.hero-content .actions a.btn','text'],heroNote:['.tiny-note','text'],servicesEyebrow:['#services .section-head .eyebrow','text'],servicesTitle:['#services .section-head h2','text'],servicesDesc:['#services .section-head p','text'],service1Title:['#services .service:nth-child(1) h3','text'],service1Desc:['#services .service:nth-child(1) p','text'],service2Title:['#services .service:nth-child(2) h3','text'],service2Desc:['#services .service:nth-child(2) p','text'],service3Title:['#services .service:nth-child(3) h3','text'],service3Desc:['#services .service:nth-child(3) p','text'],aboutEyebrow:['#about .about-text .eyebrow','text'],aboutTitle:['#about .about-text h2','html'],aboutDesc:['#about .about-text > p','text'],portfolioEyebrow:['#portfolio .section-head .eyebrow','text'],portfolioTitle:['#portfolio .section-head h2','text'],portfolioDesc:['#portfolio .section-head p','text'],journeyTitle:['.journey h2','text'],journeyDesc:['.journey-grid > div:first-child > p','text'],quoteText:['.quote > p','text'],contactTitle:['#contact h2','text'],contactDesc:['#contact p','text'],contactButton:['#contact .btn','text'],footerText:['.footer-inner > span:first-child','text'],footerTagline:['.footer-inner > span:nth-child(2)','text']};
+    for(const [k,[sel,type]] of Object.entries(map)){const el=doc.querySelector(sel),v=settings.texts[k];if(el&&typeof v==='string'){if(type==='html')el.innerHTML=v;else el.textContent=v}}
+    for(const [k,v] of Object.entries(settings.colors||{}))if(/^#[0-9a-fA-F]{6}$/.test(v))doc.documentElement.style.setProperty('--'+k,v);
+    const images={hero:'.hero-photo img',about:'.about-photo img',work1:'.work-card:nth-child(1) img',work2:'.work-card:nth-child(2) img',work3:'.work-card:nth-child(3) img'};
+    for(const [k,sel] of Object.entries(images)){const el=doc.querySelector(sel),url=settings.images?.[k];if(el&&typeof url==='string'&&/^https:\/\//i.test(url))el.src=url}
+   }catch(err){console.warn('Could not apply edits directly to live preview',err)}
+  };
+  apply();
   clearTimeout(livePreviewTimer);
-  livePreviewTimer=setTimeout(()=>{const frame=$('liveSitePreview');if(frame)frame.src='./?preview=1&live='+Date.now()},450);
+  livePreviewTimer=setTimeout(()=>{if(frame)frame.src='./?preview=1&live='+Date.now()},900);
  }catch(e){console.warn('Live preview update failed',e)}
 }
 document.addEventListener('input',e=>{if(e.target.closest('#dashboard')&&e.target.matches('input,textarea,select')&&e.target.id!=='itemImage')syncLivePreview()});
