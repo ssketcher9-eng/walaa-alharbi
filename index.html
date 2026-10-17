@@ -47,7 +47,9 @@ try{
  for(const [k,[sel,type]] of Object.entries(map)){if(typeof c.texts?.[k]!=='string')continue;const el=document.querySelector(sel);if(el){if(type==='html')el.innerHTML=c.texts[k];else if(k==='brand'){const mark=el.querySelector('.brand-mark');el.textContent=c.texts[k];if(mark)el.prepend(mark)}else el.textContent=c.texts[k]}}\n if(typeof c.texts?.contactEmail==='string'&&/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(c.texts.contactEmail)){const a=document.querySelector('#contact .btn');if(a)a.href='mailto:'+c.texts.contactEmail}
  const colors=c.colors||{};for(const [k,v] of Object.entries(colors)){if(/^#[0-9a-fA-F]{6}$/.test(v))document.documentElement.style.setProperty('--'+k,v)}
  const im=c.images||{};for(const [k,sel] of Object.entries({hero:'.hero-photo img',about:'.about-photo img',work1:'.work-card:nth-child(1) img',work2:'.work-card:nth-child(2) img',work3:'.work-card:nth-child(3) img'})){if(typeof im[k]==='string'&&/^https:\/\//.test(im[k])){const el=document.querySelector(sel);if(el)el.src=im[k]}}
-}catch(e){console.warn('Athar site settings unavailable',e)}
+const {data:works}=await db.from('portfolio_items').select('title,description,category,image_url,is_published').eq('is_published',true).order('display_order').order('created_at',{ascending:false});
+ if(works&&works.length){const grid=document.querySelector('.work-grid');if(grid){grid.replaceChildren();for(const w of works){const card=document.createElement('article');card.className='work-card reveal show';const media=document.createElement('div');media.className='work-image';if(w.image_url){const img=document.createElement('img');img.src=w.image_url;img.alt=w.title||'';media.appendChild(img)}const tag=document.createElement('span');tag.className='work-tag';tag.textContent=w.category||'عمل تعليمي';media.appendChild(tag);const body=document.createElement('div');body.className='work-body';const h=document.createElement('h3');h.textContent=w.title||'';const p=document.createElement('p');p.textContent=w.description||'';body.append(h,p);card.append(media,body);grid.appendChild(card)}}}
+ }catch(e){console.warn('Athar site settings unavailable',e)}
 })();
 </script>
 </body></html>
