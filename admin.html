@@ -52,7 +52,7 @@ function syncLivePreview(){
   };
   apply();
   clearTimeout(livePreviewTimer);
-  livePreviewTimer=setTimeout(()=>{if(frame)frame.src='./?preview=1&live='+Date.now()},900);
+  // Intentionally do not reload the iframe while typing; that reload discarded unsaved field contents.
  }catch(e){console.warn('Live preview update failed',e)}
 }
 document.addEventListener('input',e=>{if(e.target.closest('#dashboard')&&e.target.matches('input,textarea,select')&&e.target.id!=='itemImage')syncLivePreview()});
