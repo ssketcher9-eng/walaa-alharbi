@@ -43,6 +43,8 @@ function syncLivePreview(){
  }catch(e){console.warn('Live preview update failed',e)}
 }
 document.addEventListener('input',e=>{if(e.target.closest('#dashboard')&&e.target.matches('input,textarea,select')&&e.target.id!=='itemImage')syncLivePreview()});
+window.addEventListener('storage',e=>{if(e.key!==DRAFT_KEY||!e.newValue)return;try{const next=JSON.parse(e.newValue);if(!next||!next.texts)return;settings=next;fillForm();fillVisual();}catch(err){console.warn('Could not sync inline edits',err)}});
+
 document.addEventListener('change',e=>{if(e.target.closest('#dashboard')&&e.target.matches('input,textarea,select')&&e.target.id!=='itemImage')syncLivePreview()});
 $('refreshLivePreview').onclick=()=>{syncLivePreview();clearTimeout(livePreviewTimer);livePreviewTimer=setTimeout(()=>{$('liveSitePreview').src='./?preview=1&live='+Date.now()},50)};
 function say(id,msg,bad=false){const e=$(id);e.textContent=msg;e.classList.remove('hidden');e.classList.toggle('bad',bad)}
