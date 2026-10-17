@@ -37,8 +37,8 @@ const key='sb_publishable_O89-nNcEkT75pCysd-wLTQ_3u3ZNck1';
 try{
  const db=window.supabase.createClient(url,key);
  const {data,error}=await db.from('site_content').select('content').eq('content_key','site_settings').maybeSingle();
- if(error||!data?.content)return;
- let c=data.content;
+ if(error)return;
+ let c=data?.content||{};
  if(new URLSearchParams(location.search).get('preview')==='1'){try{const draft=JSON.parse(localStorage.getItem('athar-site-draft-v1')||'null');if(draft&&draft.texts)c=draft}catch{}}
  const map={
  heroEyebrow:['.hero-content .eyebrow','text'],heroTitle:['.hero-content h1','html'],heroDesc:['.hero-copy','text'],heroButton:['.hero-content .actions a.btn','text'],heroNote:['.tiny-note','text'],
