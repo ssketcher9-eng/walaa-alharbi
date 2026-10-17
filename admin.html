@@ -35,7 +35,7 @@ function syncLivePreview(){
  try{
   for(const [k] of textDefs){const e=$('txt-'+k);if(e)settings.texts[k]=e.value}
   for(const [k] of colorDefs){const e=$('col-'+k);if(e&&/^#[0-9a-fA-F]{6}$/.test(e.value.trim()))settings.colors[k]=e.value.trim()}
-  for(const [k] of imageDefs){const e=$('img-'+k);if(e&&e.value.trim())settings.images[k]=e.value.trim();else delete settings.images[k]}
+  for(const [k] of imageDefs){const e=$('img-'+k);if(e&&e.value.trim())settings.images[k]=e.value.trim();else if(!settings.images?.[k]){settings.images||={};/* preserve saved image URLs when an image field is blank */}}
   settings.design=visualValues();
   localStorage.setItem(DRAFT_KEY,JSON.stringify(settings));
   clearTimeout(livePreviewTimer);
