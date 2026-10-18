@@ -54,8 +54,25 @@ try{
 let works=null;
  const isDraftPreview=new URLSearchParams(location.search).get('preview')==='1';
  try{let query=db.from('portfolio_items').select('title,description,category,image_url,link_url,is_published').order('display_order').order('created_at',{ascending:false});if(!isDraftPreview)query=query.eq('is_published',true);const result=await query;if(result.error)console.warn('تعذر تحميل الأعمال:',result.error);else works=result.data}catch(workError){console.warn('تعذر تحميل الأعمال؛ سيستمر وضع المعاينة:',workError)}
- if(works){const grid=document.querySelector('.work-grid');if(grid){grid.replaceChildren();for(const [workIndex,w] of works.entries()){const edit=(c.portfolioEdits||[])[workIndex]||{};if(typeof edit.title==='string')w.title=edit.title;if(typeof edit.description==='string')w.description=edit.description;if(typeof edit.category==='string')w.category=edit.category;const card=document.createElement('article');card.className='work-card reveal show';const destination=(w.link_url||'').trim();const clickable=!!destination;const outer=clickable?document.createElement('a'):card;if(clickable){outer.href=destination;outer.className='work-card-link';if(/^https:\/\//i.test(destination)){outer.target='_blank';outer.rel='noopener noreferrer'}}const media=document.createElement('div');media.className='work-image';if(w.image_url){const img=document.createElement('img');img.src=w.image_url;img.alt=w.title||'';media.appendChild(img)}const tag=document.createElement('span');tag.className='work-tag';tag.textContent=w.category||'عمل تعليمي';media.appendChild(tag);const body=document.createElement('div');body.className='work-body';const h=document.createElement('h3');h.textContent=w.title||'';const p=document.createElement('p');p.textContent=w.description||'';body.append(h,p);if(clickable){outer.append(media,body);card.append(outer)}else card.append(media,body);grid.appendChild(card)}}}
-  /* Re-apply configured images after published portfolio cards replace the original grid. */
+ const grid=document.getElementById('resource-links-grid');
+ if(grid&&Array.isArray(c.linkCards)&&c.linkCards.length){
+  grid.replaceChildren();
+  for(const item of c.linkCards){
+   const card=document.createElement('article');card.className='work-card reveal show';
+   const media=document.createElement('div');media.className='work-image';
+   if(item.image){const img=document.createElement('img');img.src=item.image;img.alt=item.title||'';media.appendChild(img)}
+   else{media.style.cssText='display:grid;place-items:center;background:#f7e8c7;color:#263b36;font-size:42px';media.textContent='↗'}
+   const body=document.createElement('div');body.className='work-body';
+   const h=document.createElement('h3');h.textContent=item.title||'';
+   const p=document.createElement('p');p.textContent=item.description||'';
+   body.append(h,p);
+   const destination=(item.url||'').trim();
+   if(destination){const link=document.createElement('a');link.className='work-card-link';link.href=destination;link.target='_blank';link.rel='noopener noreferrer';link.append(media,body);card.append(link)}
+   else card.append(media,body);
+   grid.appendChild(card);
+  }
+ }else if(works&&grid){grid.replaceChildren();for(const [workIndex,w] of works.entries()){const edit=(c.portfolioEdits||[])[workIndex]||{};if(typeof edit.title==='string')w.title=edit.title;if(typeof edit.description==='string')w.description=edit.description;if(typeof edit.category==='string')w.category=edit.category;const card=document.createElement('article');card.className='work-card reveal show';const destination=(w.link_url||'').trim();const clickable=!!destination;const outer=clickable?document.createElement('a'):card;if(clickable){outer.href=destination;outer.className='work-card-link';if(/^https:\/\//i.test(destination)){outer.target='_blank';outer.rel='noopener noreferrer'}}const media=document.createElement('div');media.className='work-image';if(w.image_url){const img=document.createElement('img');img.src=w.image_url;img.alt=w.title||'';media.appendChild(img)}const tag=document.createElement('span');tag.className='work-tag';tag.textContent=w.category||'عمل تعليمي';media.appendChild(tag);const body=document.createElement('div');body.className='work-body';const h=document.createElement('h3');h.textContent=w.title||'';const p=document.createElement('p');p.textContent=w.description||'';body.append(h,p);if(clickable){outer.append(media,body);card.append(outer)}else card.append(media,body);grid.appendChild(card)}}
+   /* Re-apply configured images after published portfolio cards replace the original grid. */
   for(const [k,sel] of Object.entries({hero:'.hero-photo img',about:'.about-photo img',work1:'.work-card:nth-child(1) img',work2:'.work-card:nth-child(2) img',work3:'.work-card:nth-child(3) img'})){const el=document.querySelector(sel);const url=c.images?.[k];if(el&&typeof url==='string'&&(/^https:\/\//i.test(url)||/^data:image\//i.test(url))){el.src=url;el.dataset.configuredImage='1';el.onerror=()=>{console.error('Athar image failed to load:',k,url);el.style.visibility='hidden';el.parentElement.style.background='#e5e6dc';el.parentElement.dataset.imageError='1'};el.onload=()=>{el.style.visibility='visible';el.parentElement.removeAttribute('data-image-error')}}}
 
  if(new URLSearchParams(location.search).get('preview')==='1'){
