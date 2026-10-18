@@ -1,8 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<script>document.documentElement.classList.add("athar-loading");window.setTimeout(()=>{document.documentElement.classList.remove("athar-loading");document.documentElement.classList.add("athar-ready")},2500);</script>
-<style>html.athar-loading body{opacity:0}html.athar-ready body{opacity:1;transition:opacity .12s ease}</style>
+
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f7f3e9">
 <title>أثر | ملف المعلمة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
@@ -72,7 +71,7 @@ let works=null;
   previewImagePicker.addEventListener('change',()=>{const file=previewImagePicker.files?.[0];if(!file||!previewTarget||!previewKey)return;if(!file.type.startsWith('image/')){alert('اختاري ملف صورة.');return}if(file.size>15*1024*1024){alert('حجم الصورة أكبر من 15 ميجابايت. اختاري صورة أصغر.');return}const reader=new FileReader();reader.onerror=()=>alert('تعذرت قراءة الصورة من الجهاز.');reader.onload=()=>{const source=new Image();source.onerror=()=>alert('تعذر فتح ملف الصورة.');source.onload=()=>{const scale=Math.min(1,1400/Math.max(source.naturalWidth,source.naturalHeight));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(source.naturalWidth*scale));canvas.height=Math.max(1,Math.round(source.naturalHeight*scale));canvas.getContext('2d').drawImage(source,0,0,canvas.width,canvas.height);const dataUrl=canvas.toDataURL('image/jpeg',0.82);draft.images||={};draft.images[previewKey]=dataUrl;previewTarget.src=dataUrl;saveDraft()};source.src=reader.result};reader.readAsDataURL(file)});
   document.querySelectorAll('.work-card').forEach((card,i)=>{const title=card.querySelector('h3'),desc=card.querySelector('p'),tag=card.querySelector('.work-tag');for(const [el,suffix] of [[title,'title'],[desc,'description'],[tag,'category']])if(el){el.dataset.atharEditable='1';el.contentEditable='true';el.addEventListener('input',()=>{draft.portfolioEdits||=[];draft.portfolioEdits[i]||={};draft.portfolioEdits[i][suffix]=el.textContent;saveDraft()})}});
  }
- }catch(e){console.warn('Athar site settings unavailable',e)}finally{document.documentElement.classList.remove('athar-loading');document.documentElement.classList.add('athar-ready')}
+ }catch(e){console.warn('Athar site settings unavailable',e)}finally{}
 })();
 </script>
 
