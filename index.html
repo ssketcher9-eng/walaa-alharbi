@@ -70,4 +70,43 @@ let works=null;
  }catch(e){console.warn('Athar site settings unavailable',e)}
 })();
 </script>
+
+<script>
+/* Authenticated inline editing for Athar */
+(()=> {
+ const supabaseUrl='https://ftzuqzonmszekxvhzojc.supabase.co';
+ const supabaseKey='sb_publishable_O89-nNcEkT75pCysd-wLTQ_3u3ZNck1';
+ const client=window.supabase?.createClient(supabaseUrl,supabaseKey);
+ if(!client)return;
+ const css=document.createElement('style');
+ css.textContent='#athar-edit-dock{position:fixed;z-index:100000;bottom:16px;left:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#263b36;color:#fff;padding:10px;border-radius:14px;box-shadow:0 8px 28px #0003;font:12px Alexandria,sans-serif}#athar-edit-dock button{border:0;border-radius:9px;padding:9px 12px;cursor:pointer;font:inherit}body.athar-editing [data-athar-live-edit]{outline:2px dashed #edbd59;outline-offset:3px;cursor:text}body.athar-editing img[data-athar-live-image]{outline:2px dashed #edbd59;outline-offset:-3px;cursor:pointer}';
+ document.head.appendChild(css);
+ const dock=document.createElement('div');dock.id='athar-edit-dock';
+ const login=document.createElement('button');login.textContent='دخول الإدارة';
+ const status=document.createElement('span');status.textContent='تعديل الصفحة بعد تسجيل الدخول';
+ dock.append(login,status);document.body.append(dock);
+ let session=null,content={},dirty=false;
+ const map={
+ heroEyebrow:'.hero-content .eyebrow',heroTitle:'.hero-content h1',heroDesc:'.hero-copy',heroButton:'.hero-content .actions a.btn',heroNote:'.tiny-note',
+ servicesEyebrow:'#services .section-head .eyebrow',servicesTitle:'#services .section-head h2',servicesDesc:'#services .section-head p',
+ service1Title:'#services .service:nth-child(1) h3',service1Desc:'#services .service:nth-child(1) p',service2Title:'#services .service:nth-child(2) h3',service2Desc:'#services .service:nth-child(2) p',service3Title:'#services .service:nth-child(3) h3',service3Desc:'#services .service:nth-child(3) p',
+ aboutEyebrow:'#about .about-text .eyebrow',aboutTitle:'#about .about-text h2',aboutDesc:'#about .about-text > p',
+ portfolioEyebrow:'#portfolio .section-head .eyebrow',portfolioTitle:'#portfolio .section-head h2',portfolioDesc:'#portfolio .section-head p',
+ journeyTitle:'.journey h2',journeyDesc:'.journey-grid > div:first-child > p',quoteText:'.quote > p',contactTitle:'#contact h2',contactDesc:'#contact p',contactButton:'#contact .btn',footerText:'.footer-inner > span:first-child',footerTagline:'.footer-inner > span:nth-child(2)'
+ };
+ function read(el,key){return ['heroTitle','aboutTitle'].includes(key)?el.innerHTML:el.textContent}
+ function enable(){
+  document.body.classList.add('athar-editing');
+  for(const [key,selector] of Object.entries(map)){const el=document.querySelector(selector);if(!el)continue;el.dataset.atharLiveEdit='1';el.contentEditable='true';el.spellcheck=false;el.addEventListener('input',()=>{content.texts=content.texts||{};content.texts[key]=read(el,key);dirty=true;save.disabled=false})}
+  document.querySelectorAll('.hero-photo img,.about-photo img,.work-card img').forEach((img,i)=>{img.dataset.atharLiveImage='1';img.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();const next=prompt('الصقي رابط الصورة الجديد (https://)',img.src);if(next===null)return;if(!/^https:\/\//i.test(next.trim())){alert('الرابط لازم يبدأ بـ https://');return}img.src=next.trim();content.images=content.images||{};const k=img.closest('.hero-photo')?'hero':img.closest('.about-photo')?'about':'work'+(Array.from(document.querySelectorAll('.work-card img')).indexOf(img)+1);content.images[k]=next.trim();dirty=true;save.disabled=false})});
+  login.remove();status.textContent='وضع التعديل مفعّل — عدّلي النصوص أو اضغطي الصور';
+  const save=document.createElement('button');save.textContent='حفظ التعديلات';save.disabled=true;save.style.background='#edbd59';save.style.color='#263b36';dock.append(save);
+  const logout=document.createElement('button');logout.textContent='خروج';dock.append(logout);
+  save.addEventListener('click',async()=>{save.disabled=true;status.textContent='جارٍ الحفظ…';const {error}=await client.from('site_content').upsert({content_key:'site_settings',content,updated_at:new Date().toISOString(),updated_by:session.user.id},{onConflict:'content_key'});if(error){status.textContent='فشل الحفظ: '+error.message;save.disabled=false;return}dirty=false;status.textContent='تم الحفظ في قاعدة البيانات';});
+  logout.addEventListener('click',async()=>{if(dirty&&!confirm('عندك تعديلات غير محفوظة. الخروج؟'))return;await client.auth.signOut();location.reload()});
+ }
+ login.addEventListener('click',async()=>{const email=prompt('البريد الإلكتروني لحساب الإدارة');if(!email)return;const password=prompt('كلمة المرور');if(!password)return;status.textContent='جارٍ التحقق…';const {data,error}=await client.auth.signInWithPassword({email:email.trim(),password});if(error){status.textContent='تعذر الدخول: '+error.message;return}const {data:profile,error:pe}=await client.from('profiles').select('role').eq('id',data.user.id).maybeSingle();if(pe||!profile||!['admin','editor'].includes(profile.role)){await client.auth.signOut();status.textContent='هذا الحساب ليس لديه صلاحية تعديل الموقع.';return}session=data;const {data:row,error:ce}=await client.from('site_content').select('content').eq('content_key','site_settings').maybeSingle();if(ce){status.textContent='تعذر تحميل الإعدادات: '+ce.message;return}content=row?.content||{};enable()});
+})();
+</script>
+
 </body></html>
