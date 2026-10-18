@@ -98,9 +98,24 @@ let works=null;
  function enable(){
   document.body.classList.add('athar-editing');
   for(const [key,selector] of Object.entries(map)){const el=document.querySelector(selector);if(!el)continue;el.dataset.atharLiveEdit='1';el.contentEditable='true';el.spellcheck=false;el.addEventListener('input',()=>{content.texts=content.texts||{};content.texts[key]=read(el,key);dirty=true;save.disabled=false})}
-  document.querySelectorAll('.hero-photo img,.about-photo img,.work-card img').forEach((img,i)=>{img.dataset.atharLiveImage='1';img.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();const next=prompt('الصقي رابط الصورة الجديد (https://)',img.src);if(next===null)return;if(!/^https:\/\//i.test(next.trim())){alert('الرابط لازم يبدأ بـ https://');return}img.src=next.trim();content.images=content.images||{};const k=img.closest('.hero-photo')?'hero':img.closest('.about-photo')?'about':'work'+(Array.from(document.querySelectorAll('.work-card img')).indexOf(img)+1);content.images[k]=next.trim();dirty=true;save.disabled=false})});
+  // Delegate image clicks so dynamically loaded portfolio images remain editable.
+  document.addEventListener('click',e=>{
+   const img=e.target.closest('img');
+   if(!img||!img.matches('.hero-photo img,.about-photo img,.work-card img')||!document.body.classList.contains('athar-editing'))return;
+   e.preventDefault();e.stopPropagation();
+   const next=prompt('الصقي رابط الصورة الجديد (يبدأ بـ https://)',img.currentSrc||img.src);
+   if(next===null)return;
+   const value=next.trim();
+   if(!/^https:\/\//i.test(value)){alert('الرابط لازم يبدأ بـ https://');return}
+   content.images=content.images||{};
+   const k=img.closest('.hero-photo')?'hero':img.closest('.about-photo')?'about':'work'+(Array.from(document.querySelectorAll('.work-card img')).indexOf(img)+1);
+   img.src=value;content.images[k]=value;dirty=true;
+   const save=dock.querySelector('button[data-athar-save]');
+   if(save)save.disabled=false;
+  },true);
+
   login.remove();status.textContent='وضع التعديل مفعّل — عدّلي النصوص أو اضغطي الصور';
-  const save=document.createElement('button');save.textContent='حفظ التعديلات';save.disabled=true;save.style.background='#edbd59';save.style.color='#263b36';dock.append(save);
+  const save=document.createElement('button');save.textContent='حفظ التعديلات';save.dataset.atharSave='1';save.disabled=true;save.style.background='#edbd59';save.style.color='#263b36';dock.append(save);
   const logout=document.createElement('button');logout.textContent='خروج';dock.append(logout);
   save.addEventListener('click',async()=>{save.disabled=true;status.textContent='جارٍ الحفظ…';const {error}=await client.from('site_content').upsert({content_key:'site_settings',content,updated_at:new Date().toISOString(),updated_by:session.user.id},{onConflict:'content_key'});if(error){status.textContent='فشل الحفظ: '+error.message;save.disabled=false;return}dirty=false;status.textContent='تم الحفظ في قاعدة البيانات';});
   logout.addEventListener('click',async()=>{if(dirty&&!confirm('عندك تعديلات غير محفوظة. الخروج؟'))return;await client.auth.signOut();location.reload()});
