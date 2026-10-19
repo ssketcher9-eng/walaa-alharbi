@@ -116,6 +116,33 @@ body{background:var(--paper);color:var(--ink);font-size:14px}
 }
 @media(max-width:420px){.hero-layout{padding:42px 0 50px}.hero-figure{height:285px}.hero-title h1{font-size:36px}}
 
+
+/* Motion layer: gentle entrance, floating details and responsive interactions */
+@keyframes heroRise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes drift{0%,100%{transform:translate3d(0,0,0) rotate(-10deg)}50%{transform:translate3d(0,-13px,0) rotate(-7deg)}}
+@keyframes orbitTurn{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes softPulse{0%,100%{opacity:.48;transform:scale(.96)}50%{opacity:.8;transform:scale(1.04)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.hero-title{animation:heroRise .85s cubic-bezier(.2,.7,.2,1) both}
+.hero-kicker{animation:heroRise .7s .08s both}
+.hero-title h1{animation:heroRise .85s .16s both}
+.hero-summary{animation:heroRise .8s .27s both}
+.hero-actions{animation:heroRise .8s .38s both}
+.hero:after{animation:softPulse 7s ease-in-out infinite}
+.hero-figure .figure-halo{animation:drift 7s ease-in-out infinite}
+.hero-figure .woman{transform-origin:50% 85%;animation:bob 5.5s ease-in-out infinite}
+.hero-figure .desk-prop,.hero-figure .book{animation:bob 6s ease-in-out infinite}
+.hero-figure .book{animation-delay:-2.2s}
+.hero-figure:before{content:"";position:absolute;inset:5% 3%;border:1px dashed #8eb3a0;border-radius:50%;animation:orbitTurn 42s linear infinite;pointer-events:none}
+.hero-actions a{transition:transform .25s ease,box-shadow .25s ease,background .25s ease}
+.hero-actions a:hover{transform:translateY(-4px)}
+.section .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.section .reveal.visible{opacity:1;transform:translateY(0)}
+.work-card,.evaluation-item,.fact,.about-mark{transition:transform .3s ease,box-shadow .3s ease}
+.work-card:hover,.evaluation-item:hover{transform:translateY(-6px)}
+.about-mark:hover{transform:rotate(-2deg) scale(1.015)}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}.section .reveal{opacity:1;transform:none}}
+
 </style></head>
 <body>
 <main>
@@ -146,7 +173,7 @@ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;const layers
 const SUPABASE_URL='https://ftzuqzonmszekxvhzojc.supabase.co',SUPABASE_KEY='sb_publishable_O89-nNcEkT75pCysd-wLTQ_3u3ZNck1';
 const setText=(id,v)=>{const el=document.getElementById(id);if(el&&typeof v==='string'&&v.trim())el.textContent=v};
 async function init(){try{const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);const {data,error}=await db.from('site_content').select('content').eq('content_key','site_settings').maybeSingle();if(error)console.warn('تعذر تحميل إعدادات الموقع',error);const c=data?.content||{};const t=c.texts||{};
-setText('heroTitle','أثَر');setText('heroName','ولاء الحربي');
+setText('heroName','ولاء الحربي');
 setText('aboutEyebrow',t.aboutEyebrow);setText('aboutTitle',t.aboutTitle);setText('aboutDesc',t.aboutDesc);setText('teacherRole',t.teacherRole);setText('teacherSpecialty',t.teacherSpecialty);setText('teacherExperience',t.teacherExperience);setText('evaluationTitle',t.evaluationTitle);setText('evaluationDesc',t.evaluationDesc);setText('evaluation1Title',t.evaluation1Title);setText('evaluation1Desc',t.evaluation1Desc);setText('evaluation2Title',t.evaluation2Title);setText('evaluation2Desc',t.evaluation2Desc);setText('evaluation3Title',t.evaluation3Title);setText('evaluation3Desc',t.evaluation3Desc);setText('portfolioTitle',t.portfolioTitle);setText('portfolioDesc',t.portfolioDesc);setText('contactTitle',t.contactTitle);setText('contactDesc',t.contactDesc);setText('footerText',t.footerText);
 if(c.colors)for(const [k,v] of Object.entries(c.colors)){if(/^#[0-9a-f]{6}$/i.test(v)&&['ink','green','green2','cream','paper','gold','rose','blue','muted'].includes(k))document.documentElement.style.setProperty('--'+(k==='green'?'mauve':k==='cream'?'pale':k),v)}
 /* The new hero is a layered CSS illustration. Do not overlay the legacy uploaded hero photo on top of it. */
