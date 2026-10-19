@@ -54,6 +54,14 @@ const textDefs=[
 ['contactTitle','عنوان التواصل','','للتواصل والتعاون'],
 ['contactDesc','وصف التواصل','','للتعاون وتبادل الخبرات والموارد التعليمية.'],
 ['contactEmail','البريد الإلكتروني للتواصل','','teacher@example.com'],
+['serviceTitle','عنوان قسم الخدمات','','التعليم أكثر من درسٍ في الجدول'],
+['serviceDesc','وصف قسم الخدمات','','أصمّم تجارب تعليمية تجمع بين المعرفة والمشاركة والإبداع، وتمنح كل متعلّمة فرصة لتكتشف قدراتها.'],
+['service1Title','البطاقة الأولى — العنوان','','دروس تفاعلية'],
+['service1Desc','البطاقة الأولى — الوصف','','شرح واضح وأنشطة متنوعة تجعل المفاهيم أقرب وأسهل، وتحوّل الطالبة من متلقية إلى مشاركة.'],
+['service2Title','البطاقة الثانية — العنوان','','مشاريع ومبادرات'],
+['service2Desc','البطاقة الثانية — الوصف','','أفكار ومبادرات مدرسية تنمّي روح التعاون، وتربط التعلّم بالحياة والمواقف اليومية.'],
+['service3Title','البطاقة الثالثة — العنوان','','موارد تعليمية'],
+['service3Desc','البطاقة الثالثة — الوصف','','أوراق عمل وعروض ومواد بصرية منظّمة، مصممة لتدعم الفهم وتراعي اختلاف طرق التعلّم.'],
 ['footerText','نص التذييل','','أثَر — ملف المعلمة ولاء الحربي']
 ]
 const colorDefs=[['ink','لون النص الأساسي','#263b36'],['green','اللون الأخضر الرئيسي','#477e6e'],['green2','الأخضر الفاتح','#8fbca6'],['cream','الخلفية الكريمية','#f7f3e9'],['paper','خلفية الأقسام الفاتحة','#fffdf8'],['gold','اللون الذهبي','#edbd59'],['rose','الوردي الهادئ','#d99191'],['blue','الأزرق الفاتح','#9bc9db'],['muted','لون النص الثانوي','#6f7c74']];
@@ -73,7 +81,7 @@ function syncLivePreview(){
   const apply=()=>{
    try{
     const doc=frame.contentDocument;if(!doc)return;
-    const map={aboutEyebrow:['#about .eyebrow','text'],aboutTitle:['#about .about-copy h2','text'],aboutDesc:['#about .about-copy > p','text'],teacherRole:['#teacherRole','text'],teacherSpecialty:['#teacherSpecialty','text'],teacherExperience:['#teacherExperience','text'],evaluationTitle:['#evaluationTitle','text'],evaluationDesc:['#evaluationDesc','text'],evaluation1Title:['#evaluationGrid .evaluation-item:nth-child(1) h3','text'],evaluation1Desc:['#evaluationGrid .evaluation-item:nth-child(1) p','text'],evaluation2Title:['#evaluationGrid .evaluation-item:nth-child(2) h3','text'],evaluation2Desc:['#evaluationGrid .evaluation-item:nth-child(2) p','text'],evaluation3Title:['#evaluationGrid .evaluation-item:nth-child(3) h3','text'],evaluation3Desc:['#evaluationGrid .evaluation-item:nth-child(3) p','text'],portfolioTitle:['#portfolioTitle','text'],portfolioDesc:['#portfolioDesc','text'],contactTitle:['#contactTitle','text'],contactDesc:['#contactDesc','text'],footerText:['#footerText','text']};
+    const map={serviceTitle:['#services .section-head h2','text'],serviceDesc:['#services .section-head p','text'],service1Title:['#services .service:nth-child(1) h3','text'],service1Desc:['#services .service:nth-child(1) p','text'],service2Title:['#services .service:nth-child(2) h3','text'],service2Desc:['#services .service:nth-child(2) p','text'],service3Title:['#services .service:nth-child(3) h3','text'],service3Desc:['#services .service:nth-child(3) p','text'],aboutEyebrow:['#about .eyebrow','text'],aboutTitle:['#about .about-copy h2','text'],aboutDesc:['#about .about-copy > p','text'],teacherRole:['#teacherRole','text'],teacherSpecialty:['#teacherSpecialty','text'],teacherExperience:['#teacherExperience','text'],evaluationTitle:['#evaluationTitle','text'],evaluationDesc:['#evaluationDesc','text'],evaluation1Title:['#evaluationGrid .evaluation-item:nth-child(1) h3','text'],evaluation1Desc:['#evaluationGrid .evaluation-item:nth-child(1) p','text'],evaluation2Title:['#evaluationGrid .evaluation-item:nth-child(2) h3','text'],evaluation2Desc:['#evaluationGrid .evaluation-item:nth-child(2) p','text'],evaluation3Title:['#evaluationGrid .evaluation-item:nth-child(3) h3','text'],evaluation3Desc:['#evaluationGrid .evaluation-item:nth-child(3) p','text'],portfolioTitle:['#portfolioTitle','text'],portfolioDesc:['#portfolioDesc','text'],contactTitle:['#contactTitle','text'],contactDesc:['#contactDesc','text'],footerText:['#footerText','text']};
     for(const [k,[sel,type]] of Object.entries(map)){const el=doc.querySelector(sel),v=settings.texts[k];if(el&&typeof v==='string'){if(type==='html')el.innerHTML=v;else el.textContent=v}}
     // Let the administrator click text in the live preview to jump to its matching editor field.
     const editableMap={...Object.fromEntries(Object.entries(map).map(([k,v])=>[v[0],k])), '#contactEmail':'contactEmail'};
