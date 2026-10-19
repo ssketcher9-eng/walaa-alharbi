@@ -86,6 +86,36 @@ body{background:var(--paper);color:var(--ink);font-size:14px}
  .work-grid{grid-template-columns:1fr}
 }
 
+
+/* Hero restyled to match the supplied reference */
+.hero{min-height:calc(100svh - 68px);background:#f5f2e8;position:relative;overflow:hidden}
+.hero:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,#e9cfc4 0 5px,transparent 5.5px);background-size:100px 100px;background-position:2px 10px;opacity:.72}
+.hero:after{content:"";position:absolute;pointer-events:none;right:8%;top:8%;width:270px;height:130px;border-radius:50%;background:#efdca6;filter:blur(2px);opacity:.75}
+.hero-layout{position:relative;z-index:1;min-height:calc(100svh - 68px);padding:clamp(70px,9vw,120px) 0;display:grid;grid-template-columns:.85fr 1.15fr;gap:6vw;direction:ltr;align-items:center}
+.hero-title{direction:rtl;grid-column:2;grid-row:1;max-width:700px}
+.hero-figure{display:block!important;grid-column:1;grid-row:1;height:clamp(300px,40vw,480px);min-height:0;width:100%;align-self:center}
+.hero-figure .figure-halo{background:#d8e6d6;box-shadow:0 0 0 12px #ffffffaa,0 0 0 25px #d8e6d688;border-radius:48% 48% 5% 5%}
+.hero-figure .woman{width:68%;left:16%;height:92%}
+.hero-title h1{font-size:clamp(43px,5.6vw,76px);line-height:1.42;letter-spacing:-.045em;color:#263b36;text-shadow:none;font-weight:700}
+.hero-title h1 .hero-accent{font-family:var(--serif);color:#4e887b;font-size:1.05em;font-weight:700;white-space:nowrap}
+.hero-title>p#heroName{font-size:15px;color:#65746d;margin:14px 0 0}
+.hero-summary{font-size:13px!important;max-width:560px!important;margin:8px 0 24px!important;line-height:2.1!important}
+.hero-actions{gap:14px}
+.primary-action{background:#4d8577;border-radius:28px;padding:12px 19px}
+.text-action{border:1px solid #9cbab0;border-radius:28px;padding:10px 17px}
+.hero-bottom{display:none}
+@media(max-width:760px){
+ .hero{min-height:unset}
+ .hero-layout{min-height:unset;grid-template-columns:1fr;gap:30px;padding:55px 0 65px;direction:rtl}
+ .hero-title{grid-column:1;grid-row:1}
+ .hero-title h1{font-size:clamp(36px,8vw,56px);line-height:1.5}
+ .hero-title h1 .hero-accent{white-space:normal}
+ .hero-figure{grid-column:1;grid-row:2;height:330px;width:min(100%,380px);margin:auto}
+ .hero-title>p#heroName{font-size:14px}
+ .hero-summary{font-size:12px!important}
+}
+@media(max-width:420px){.hero-layout{padding:42px 0 50px}.hero-figure{height:285px}.hero-title h1{font-size:36px}}
+
 </style></head>
 <body>
 <main>
@@ -93,7 +123,7 @@ body{background:var(--paper);color:var(--ink);font-size:14px}
 <section class="hero" id="top" aria-label="أثَر">
 <div class="scene" aria-hidden="true"><div class="sun" data-depth=".12"></div><div class="arch" data-depth=".2"></div><div class="library" data-depth=".32"></div><div class="floor" data-depth=".5"></div></div>
 <div class="wrap hero-layout">
-<div class="hero-title reveal"><div class="hero-kicker">رحلة تعليمية تصنع فرقًا</div><h1 id="heroTitle">أثَر</h1><p id="heroName">ولاء الحربي</p><p class="hero-summary">التعليم ليس نقل معرفة فحسب، بل مساحة لاكتشاف الإمكانات وبناء أثر يبقى.</p><div class="hero-actions"><a class="primary-action" href="#portfolio">استكشف الأعمال <span>←</span></a><a class="text-action" href="#about">تعرّف على المعلمة</a></div></div>
+<div class="hero-title reveal"><div class="hero-kicker">مساحة للتعلّم والإلهام</div><h1 id="heroTitle">كل طالبة تملك<br><span class="hero-accent">بداخلها حكاية نجاح</span></h1><p id="heroName">ولاء الحربي</p><p class="hero-summary">أؤمن أن التعليم أثرٌ يبقى، وأن أجمل لحظات التعلّم تبدأ بالفضول وتنمو بالتجربة. أشارك رحلتي التعليمية، وأفكاري، ومبادرات تصنع فرقًا.</p><div class="hero-actions"><a class="primary-action" href="#portfolio">استكشف الأعمال <span>←</span></a><a class="text-action" href="#about">تعرّف على المعلمة</a></div></div>
 <div class="hero-figure reveal" aria-hidden="true"><div class="figure-halo"></div><div class="woman"><div class="hair"></div><div class="head"></div><div class="neck"></div><div class="body"></div><div class="light"></div></div><div class="desk-prop"></div><div class="book"></div></div>
 </div><div class="hero-bottom">ملف المعلمة · بحث · معرفة · أثر</div>
 </section>
